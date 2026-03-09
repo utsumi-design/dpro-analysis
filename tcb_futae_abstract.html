@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCB二重整形 異業種パターン横展開 - DPro分析レポート</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 20px; background: #f5f5f5; color: #333; max-width: 1200px; margin: 0 auto; padding: 20px; }
+  h1 { color: #1a1a2e; border-bottom: 3px solid #e94560; padding-bottom: 10px; }
+  h2 { color: #1a1a2e; margin-top: 40px; border-left: 4px solid #e94560; padding-left: 12px; }
+  h3 { color: #16213e; }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  th { background: #1a1a2e; color: #fff; padding: 10px 12px; text-align: left; font-size: 13px; white-space: nowrap; }
+  td { padding: 8px 12px; border-bottom: 1px solid #eee; font-size: 13px; vertical-align: top; }
+  tr:hover { background: #f0f4ff; }
+  a { color: #0066cc; text-decoration: none; }
+  a:hover { text-decoration: underline; color: #e94560; }
+  .nav { background: #1a1a2e; padding: 12px 20px; border-radius: 8px; margin-bottom: 24px; }
+  .nav a { color: #fff; margin-right: 20px; font-size: 14px; }
+  .nav a:hover { color: #e94560; }
+  .summary-box { background: #fff; border: 2px solid #e94560; border-radius: 8px; padding: 20px; margin: 20px 0; }
+  .pattern-box { background: #f8f9fa; border-left: 4px solid #0066cc; padding: 16px; margin: 12px 0; border-radius: 0 8px 8px 0; }
+  .pattern-box h4 { margin-top: 0; color: #0066cc; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-right: 4px; }
+  .tag-ig { background: #fce4ec; color: #c62828; }
+  .tag-yt { background: #ffebee; color: #d32f2f; }
+  .tag-fb { background: #e3f2fd; color: #1565c0; }
+  .tag-tt { background: #e0f2f1; color: #00695c; }
+  .tag-high { background: #ffe0e0; color: #c0392b; }
+  .tag-mid { background: #fff3cd; color: #856404; }
+  .tag-low { background: #d4edda; color: #155724; }
+  .metric { font-size: 24px; font-weight: bold; color: #e94560; }
+  .metric-label { font-size: 12px; color: #666; }
+  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 16px 0; }
+  .metric-card { background: #fff; border-radius: 8px; padding: 16px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .priority-high { background: #e94560; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+  .priority-mid { background: #f39c12; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+  .priority-low { background: #27ae60; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+  .reason-list { list-style: none; padding: 0; }
+  .reason-list li { padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
+  .reason-list li::before { content: "\2713 "; color: #27ae60; font-weight: bold; }
+  .structure-list { list-style: none; padding: 0; }
+  .structure-list li { padding: 4px 0; }
+  .structure-list li::before { content: "\2192 "; color: #0066cc; }
+  .insight-box { background: #1a1a2e; color: #fff; border-radius: 8px; padding: 20px; margin: 20px 0; }
+  .insight-box h3 { color: #e94560; margin-top: 0; }
+  .insight-box p { color: #ccc; line-height: 1.8; }
+  .script-box { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin: 8px 0; font-size: 12px; line-height: 1.8; color: #555; }
+  .arrow-box { background: #e94560; color: #fff; text-align: center; padding: 12px; border-radius: 8px; margin: 12px 0; font-weight: bold; font-size: 14px; }
+  .abstract-box { background: #fff3cd; border: 2px solid #f39c12; border-radius: 8px; padding: 16px; margin: 12px 0; }
+  .abstract-box h5 { margin: 0 0 8px 0; color: #f39c12; }
+  .concrete-box { background: #d4edda; border: 2px solid #27ae60; border-radius: 8px; padding: 16px; margin: 12px 0; }
+  .concrete-box h5 { margin: 0 0 8px 0; color: #27ae60; }
+  .plan-box { background: #fff; border: 2px solid #0066cc; border-radius: 8px; padding: 20px; margin: 20px 0; }
+  .plan-box h4 { margin-top: 0; color: #0066cc; }
+  .plan-immediate { border-color: #e94560; }
+  .plan-immediate h4 { color: #e94560; }
+  .plan-mid { border-color: #f39c12; }
+  .plan-mid h4 { color: #f39c12; }
+  .flow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 12px 0; }
+  .flow-step { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 12px; flex: 1; min-width: 180px; }
+  .flow-arrow { font-size: 24px; color: #e94560; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="index.html">TOP15 横展開分析</a>
+  <a href="selling_phrases.html">売れ文言TOP10</a>
+  <a href="bihadado_analysis.html">東京美肌堂 CR分析</a>
+  <a href="tcb_futae_analysis.html">TCB二重整形 横展開</a>
+  <a href="tcb_futae_abstract.html"><strong>異業種パターン横展開</strong></a>
+</div>
+
+<h1>TCB二重整形 異業種パターン横展開リサーチ</h1>
+<p>データ取得日: 2026-03-10 / 集計期間: 30日間 / 対象: 二重整形以外のTikTok勝ちCR / ソース: DPro（動画分析Pro）</p>
+
+<div class="insight-box">
+  <h3>このレポートの目的</h3>
+  <p>二重整形の直接競合ではなく、<strong style="color:#e94560;">別ジャンルで大量出稿している勝ちCR</strong>の訴求パターンを分析。<br>
+  その構造を<strong style="color:#e94560;">抽象化</strong>し、TCB二重整形（若年女性向け）に<strong style="color:#e94560;">再具体化</strong>して転用する。<br>
+  二重整形市場の広告費は月間最大37万円/社と小さいため、<strong style="color:#e94560;">広告費が10〜100倍の別ジャンルの勝ちパターン</strong>にこそヒントがある。</p>
+</div>
+
+<h2>参考元 TOP5（二重整形以外・TikTok中心）</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>広告主</th>
+      <th>商材</th>
+      <th>ジャンル</th>
+      <th>媒体</th>
+      <th>広告費増(30日)</th>
+      <th>訴求の核</th>
+      <th>動画</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>1</strong></td>
+      <td>スマイルモア矯正</td>
+      <td>マウスピース矯正</td>
+      <td>歯科矯正</td>
+      <td><span class="tag tag-tt">TikTok</span></td>
+      <td><strong>&yen;4,902,240</strong></td>
+      <td>相場100万&rarr;月3,000円 / 友人会話型</td>
+      <td>
+        <a href="https://www.tiktok.com/@MS4wLjABAAAAKKJkgSBcgZ_OzvFntxnKbrdOvwmgqqI_haVJOAasESI15UD-pEA8mULeUp4t3hHc/video/7600392423616924939" target="_blank">TikTok</a> /
+        <a href="https://assets.douga-pro.com/tiktok/7600392423616924939/video.mp4" target="_blank">MP4</a>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>2</strong></td>
+      <td>フレイアクリニック</td>
+      <td>医療脱毛</td>
+      <td>医療脱毛</td>
+      <td><span class="tag tag-tt">TikTok</span></td>
+      <td><strong>&yen;2,280,000</strong></td>
+      <td>25歳以下限定 / 48,000円 / 検索しても出てこない</td>
+      <td>
+        <a href="https://www.tiktok.com/@MS4wLjABAAAAmQO2e2dK_Po07X4Abl0NkOsLBx1nwmsmxvksVwvrt2uBacjlSCnFS_Bo_LyXLm6Z/video/7607709511704530232" target="_blank">TikTok</a> /
+        <a href="https://assets.douga-pro.com/tiktok/7607709511704530232/video.mp4" target="_blank">MP4</a>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>3</strong></td>
+      <td>YBC横浜美容外科</td>
+      <td>小顔脂肪吸引</td>
+      <td>美容医療</td>
+      <td><span class="tag tag-tt">TikTok</span></td>
+      <td><strong>&yen;1,732,560</strong></td>
+      <td>10秒超短尺 / LINE@誘導 / 98,000円</td>
+      <td>
+        <a href="https://www.tiktok.com/@MS4wLjABAAAAqg-dMX3Dc8xXlPbcLbsW3zv0mJ0yVziSIvTbPHx-yRZVZ8yH2E08m45CPCRExPp-/video/7582446519001845004" target="_blank">TikTok</a> /
+        <a href="https://assets.douga-pro.com/tiktok/7582446519001845004/video.mp4" target="_blank">MP4</a>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>4</strong></td>
+      <td>LACOCO</td>
+      <td>脱毛サロン</td>
+      <td>脱毛サロン</td>
+      <td><span class="tag tag-tt">TikTok</span></td>
+      <td><strong>&yen;1,414,320</strong></td>
+      <td>ローランド推し / 地域限定&times;ラッキー / 漫画記事LP</td>
+      <td>
+        <a href="https://www.tiktok.com/@MS4wLjABAAAAJj_w5UlPyiXdFU1FIR1kn8Pq37SQgqvQwx5q5mb-4rz88QFiABAYRG0R6GEhi9Zf/video/7603923206616911116" target="_blank">TikTok</a> /
+        <a href="https://assets.douga-pro.com/tiktok/7603923206616911116/video.mp4" target="_blank">MP4</a>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>5</strong></td>
+      <td>アンス (Neautech)</td>
+      <td>オンラインニキビ治療</td>
+      <td>オンライン美肌</td>
+      <td><span class="tag tag-tt">TikTok</span></td>
+      <td><strong>&yen;2,880,000</strong></td>
+      <td>「本気の肌管理始めました」UGC型 / LINE完結</td>
+      <td>
+        <a href="https://www.tiktok.com/@MS4wLjABAAAArOBu6qgPQU9o2IbMs-q3cf9lz2nt8_CaIOCdLSKhYE30rseRrKZmJ_U8vlKGJrTL/video/7596237564076494098" target="_blank">TikTok</a> /
+        <a href="https://assets.douga-pro.com/tiktok/7596237564076494098/video.mp4" target="_blank">MP4</a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="metrics-grid">
+  <div class="metric-card">
+    <div class="metric-label">参考元の合計広告費</div>
+    <div class="metric">&yen;1,320万/月</div>
+    <div style="font-size:11px; color:#666;">二重整形市場全体の35倍の規模</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">共通媒体</div>
+    <div class="metric">TikTok</div>
+    <div style="font-size:11px; color:#666;">全5件がTikTok主力</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">共通ターゲット</div>
+    <div style="font-size:16px; font-weight:bold;">若年女性</div>
+    <div style="font-size:11px; color:#666;">18〜25歳がメインデモグラ</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">共通遷移先</div>
+    <div style="font-size:16px; font-weight:bold;">LINE@ / 記事LP</div>
+    <div style="font-size:11px; color:#666;">電話予約は皆無</div>
+  </div>
+</div>
+
+<h2>パターン別 抽象化&rarr;TCB二重整形への再具体化</h2>
+
+<!-- パターン1 -->
+<div class="pattern-box">
+  <h4>パターン1：「友人会話型」スクリプト</h4>
+  <p><strong>参考元:</strong> スマイルモア矯正（TikTok &yen;490万/月）</p>
+  <div class="script-box">
+    <strong>原文:</strong> 「そろそろ歯列矯正したいんだけど、高いし時間ないしでなかなか」「スマイルモア使えば？」「え？月3000円から始めれんで」「どういう矯正できんの？」「ほら、この透明のマウスピース使うんだって」「んーでも最近忙しいし続けて通院できるかな」「通院3ヶ月に1回でOKだって。しかも期間も最短3ヶ月」
+  </div>
+</div>
+
+<div class="abstract-box">
+  <h5>抽象化：何が効いているか</h5>
+  <ul class="reason-list">
+    <li><strong>2人の会話形式</strong>で広告感がゼロ。友達のおすすめに聞こえる</li>
+    <li><strong>「やりたいけど → 高い/忙しい」</strong>の不安を先に代弁し、すぐ解決する</li>
+    <li><strong>相場との価格ギャップ</strong>（100万&rarr;月3,000円）で「え？」を引き出す</li>
+    <li><strong>期間/回数のハードル排除</strong>（3ヶ月に1回、最短3ヶ月）で「なら行ける」</li>
+  </ul>
+</div>
+
+<div class="arrow-box">TCB二重整形に再具体化</div>
+
+<div class="concrete-box">
+  <h5>TCB二重整形への落とし込み</h5>
+  <div class="script-box">
+    <strong>スクリプト案:</strong><br>
+    A「二重整形したいんだけど、高いし怖いしでなかなか踏み出せなくて」<br>
+    B「TCB行けば？」<br>
+    A「え？TCBって二重もやってるの？」<br>
+    B「うん。しかも&yen;○○からだよ。埋没なら施術10分で終わるし」<br>
+    A「でもバレたり腫れたりしない？」<br>
+    B「私やったけど翌日からメイクできたよ。しかも保証つきだから取れても安心」<br>
+    A「え、それなら…」<br>
+    B「まずLINEでカウンセリング予約してみ？無料だから」
+  </div>
+  <p><strong>尺:</strong> 30〜45秒 / <strong>形式:</strong> 女子2人の会話（UGC風） / <strong>CTA:</strong> LINE予約</p>
+</div>
+
+<!-- パターン2 -->
+<div class="pattern-box" style="margin-top:30px;">
+  <h4>パターン2：「年齢限定オファー」型</h4>
+  <p><strong>参考元:</strong> フレイアクリニック 医療脱毛（TikTok &yen;228万/月）</p>
+  <div class="script-box">
+    <strong>原文:</strong> 「25歳以下で全身脱毛まだ始めてないなら超ラッキー！何十万もすると思ってた全身医療脱毛が今この動画からの予約で48,000円」「でもこれだけは注意。この動画は検索しても出てこないから」「予約枠が空いているかだけでも確認してみて」
+  </div>
+</div>
+
+<div class="abstract-box">
+  <h5>抽象化：何が効いているか</h5>
+  <ul class="reason-list">
+    <li><strong>「〇歳以下限定」</strong>で「自分のための広告だ」と思わせるパーソナライズ効果</li>
+    <li><strong>「まだ始めてないなら超ラッキー」</strong>で未行動を肯定→今が最高のタイミングと演出</li>
+    <li><strong>「検索しても出てこない」</strong>で広告限定の特別感。保存・即行動を促す</li>
+    <li><strong>「予約枠が空いているか確認」</strong>＝直接的なCTAではなく「確認だけ」のソフトCTA</li>
+  </ul>
+</div>
+
+<div class="arrow-box">TCB二重整形に再具体化</div>
+
+<div class="concrete-box">
+  <h5>TCB二重整形への落とし込み</h5>
+  <div class="script-box">
+    <strong>スクリプト案:</strong><br>
+    「22歳以下で二重整形まだ悩んでるなら超ラッキー！」<br>
+    「何十万もすると思ってた二重埋没が、今この動画からの予約で&yen;○○」<br>
+    「施術時間たったの10分。翌日からメイクもOK」<br>
+    「TCBは全国100院以上。保証もついてるから取れても安心」<br>
+    「でもこれだけは注意。この広告は検索しても出てきません」<br>
+    「学生のうちにぱっちり二重を手に入れたい人は、予約枠が空いてるかだけでも確認してみて」
+  </div>
+  <p><strong>尺:</strong> 40〜50秒 / <strong>形式:</strong> ナレーション+テロップ / <strong>CTA:</strong> 予約枠確認</p>
+</div>
+
+<!-- パターン3 -->
+<div class="pattern-box" style="margin-top:30px;">
+  <h4>パターン3：「地域限定&times;ラッキー&times;赤字覚悟」型</h4>
+  <p><strong>参考元:</strong> LACOCO 脱毛サロン（TikTok &yen;141万/月）</p>
+  <div class="script-box">
+    <strong>原文:</strong> 「コスパ高すぎってバズりまくって予約枠がほぼない状態に。そこでまだ予約枠がある地域に限定配信。この動画を見れた人は超超超ラッキー！」「さすがにこのキャンペーンは赤字覚悟の特別なご案内なので、この動画は本日で停止する可能性があります」
+  </div>
+</div>
+
+<div class="abstract-box">
+  <h5>抽象化：何が効いているか</h5>
+  <ul class="reason-list">
+    <li><strong>「バズって予約枠がない」</strong>＝社会的証明（みんなが殺到している）</li>
+    <li><strong>「あなたの地域にはまだ空きがある」</strong>＝あなただけの特別感</li>
+    <li><strong>「この動画を見れた人はラッキー」</strong>＝受動的に「選ばれた」感覚</li>
+    <li><strong>「本日で停止する可能性」</strong>＝即行動の緊急性。「赤字覚悟」で信憑性</li>
+    <li><strong>漫画記事LP遷移</strong>で広告感をさらに薄める</li>
+  </ul>
+</div>
+
+<div class="arrow-box">TCB二重整形に再具体化</div>
+
+<div class="concrete-box">
+  <h5>TCB二重整形への落とし込み</h5>
+  <div class="script-box">
+    <strong>スクリプト案:</strong><br>
+    「TCBの二重モニターキャンペーン、SNSで話題になりすぎて予約が殺到中」<br>
+    「でもまだ空きがある院に限定でこの動画を配信してます」<br>
+    「この動画が見れたあなた、超ラッキーです」<br>
+    「二重埋没が今だけ特別価格&yen;○○」<br>
+    「施術10分・保証つき・全国どの院でも同じクオリティ」<br>
+    「ただしこのキャンペーンは枠がなくなり次第終了。この動画も本日で停止する可能性があります」<br>
+    「お得に二重になりたい人は、あなたのエリアにまだ空きがあるか確認してみて」
+  </div>
+  <p><strong>尺:</strong> 45〜55秒 / <strong>形式:</strong> テンポの良いナレーション / <strong>CTA:</strong> 空き枠確認 / <strong>遷移先:</strong> 漫画記事LP推奨</p>
+</div>
+
+<!-- パターン4 -->
+<div class="pattern-box" style="margin-top:30px;">
+  <h4>パターン4：「本気の〇〇始めました」UGC型</h4>
+  <p><strong>参考元:</strong> アンス オンラインニキビ治療（TikTok &yen;288万/月）</p>
+  <div class="script-box">
+    <strong>原文:</strong> 「本気の肌管理始めました。ニキビにずっと悩んでたんだけど、市販の薬やサプリを試してもあまり効果が出ず、正直もっと早く始めればよかったと後悔してる」「LINEで悩みを選択、顔写真を送ればお医者さんが処方したお薬をお家に届けてくれて」
+  </div>
+</div>
+
+<div class="abstract-box">
+  <h5>抽象化：何が効いているか</h5>
+  <ul class="reason-list">
+    <li><strong>「本気の〇〇始めました」</strong>で一般人の決意表明＝共感の入口</li>
+    <li><strong>「ずっと悩んでた」「もっと早く始めればよかった」</strong>＝後悔の代弁で「私も」を引き出す</li>
+    <li><strong>市販品で解決できなかった</strong>&rarr;<strong>プロの解決策に出会えた</strong>のストーリーアーク</li>
+    <li><strong>LINE完結</strong>のハードルの低さ</li>
+  </ul>
+</div>
+
+<div class="arrow-box">TCB二重整形に再具体化</div>
+
+<div class="concrete-box">
+  <h5>TCB二重整形への落とし込み</h5>
+  <div class="script-box">
+    <strong>スクリプト案:</strong><br>
+    「本気の目元改善、始めました」<br>
+    「毎朝アイプチに20分かけて、水に濡れたら取れるし、夕方にはヨレるし、もう限界だった」<br>
+    「アイテープもメザイクも試したけど、結局毎日やり直しの繰り返し」<br>
+    「正直もっと早く決断すればよかったって後悔してる」<br>
+    「TCBで埋没やったら、施術10分で終わって翌日からメイクもできた」<br>
+    「今は朝起きてそのまま出かけられる。この感動、やった人にしかわからない」<br>
+    「悩んでる時間がもったいない。まずはLINEで無料カウンセリング予約してみて」
+  </div>
+  <p><strong>尺:</strong> 30〜40秒 / <strong>形式:</strong> 一般女性（20歳前後）の1人語り / <strong>CTA:</strong> LINE予約</p>
+</div>
+
+<!-- パターン5 -->
+<div class="pattern-box" style="margin-top:30px;">
+  <h4>パターン5：「超短尺&times;LINE@一発誘導」型</h4>
+  <p><strong>参考元:</strong> YBC横浜美容外科 小顔脂肪吸引（TikTok &yen;173万/月）</p>
+  <div class="script-box">
+    <strong>原文:</strong> 「お住み不要の小顔整形。YBCでは今ならお得なキャンペーン実施中です。お約束お待ちしております」（10秒）<br>
+    別CR: 「YBCの固定バンド不要の脂肪吸引。ダウンタイムなしでたった1日で小顔になりたい方、大募集。今なら特別価格98,000円」（29秒）
+  </div>
+</div>
+
+<div class="abstract-box">
+  <h5>抽象化：何が効いているか</h5>
+  <ul class="reason-list">
+    <li><strong>10秒で言い切る</strong>。TikTokのスワイプ速度に合わせた「1メッセージ完結」</li>
+    <li><strong>「〇〇不要」</strong>で最大の不安要素を冒頭で排除（固定バンド不要＝DT不安解消）</li>
+    <li><strong>LINE@誘導LP</strong>で電話不要。タップ→LINE追加→予約の最短導線</li>
+    <li><strong>具体価格（98,000円）</strong>の明示で「いくらかわからない不安」を排除</li>
+  </ul>
+</div>
+
+<div class="arrow-box">TCB二重整形に再具体化</div>
+
+<div class="concrete-box">
+  <h5>TCB二重整形への落とし込み</h5>
+  <div class="script-box">
+    <strong>10秒版:</strong> 「腫れない二重整形。TCBでは今だけ特別キャンペーン実施中。LINEから予約」<br><br>
+    <strong>30秒版:</strong><br>
+    「TCBの腫れにくい二重埋没」<br>
+    「ダウンタイム最小で翌日からメイクOKの二重整形をしたい方、大募集」<br>
+    「施術たったの10分。保証つきだから万が一取れても安心」<br>
+    「今なら特別価格&yen;○○」<br>
+    「LINEから無料カウンセリング予約してみて」
+  </div>
+  <p><strong>尺:</strong> 10秒 or 30秒 / <strong>形式:</strong> テロップ+ナレーション / <strong>CTA:</strong> LINE@誘導LP</p>
+</div>
+
+<h2>抽象構造の横断比較</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>抽象パターン</th>
+      <th>参考元</th>
+      <th>広告費/月</th>
+      <th>核となる心理効果</th>
+      <th>TCB二重整形への転用キー</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>友人会話型</strong></td>
+      <td>スマイルモア矯正</td>
+      <td>&yen;490万</td>
+      <td>広告感ゼロ&times;不安代弁&times;即解決</td>
+      <td>女子2人会話で「高い/怖い/バレる」を全解消</td>
+    </tr>
+    <tr>
+      <td><strong>年齢限定オファー</strong></td>
+      <td>フレイア脱毛</td>
+      <td>&yen;228万</td>
+      <td>パーソナライズ&times;限定性&times;ソフトCTA</td>
+      <td>「22歳以下で二重まだなら超ラッキー」</td>
+    </tr>
+    <tr>
+      <td><strong>地域限定&times;ラッキー</strong></td>
+      <td>LACOCO</td>
+      <td>&yen;141万</td>
+      <td>社会的証明&times;選ばれた感&times;緊急性</td>
+      <td>「あなたのエリアのTCBにまだ空きあり」</td>
+    </tr>
+    <tr>
+      <td><strong>「始めました」UGC</strong></td>
+      <td>アンス</td>
+      <td>&yen;288万</td>
+      <td>共感&times;後悔代弁&times;LINE完結</td>
+      <td>「本気の目元改善始めました」体験語り</td>
+    </tr>
+    <tr>
+      <td><strong>超短尺&times;LINE一発</strong></td>
+      <td>YBC</td>
+      <td>&yen;173万</td>
+      <td>1メッセージ完結&times;不安排除&times;最短導線</td>
+      <td>「腫れない二重整形」10秒&times;LINE誘導</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>TCB二重整形 具体的横展開案</h2>
+
+<h3>即実行（制作工数: 低〜中）</h3>
+
+<div class="plan-box plan-immediate">
+  <h4>案A：「友人会話型」TikTok CR <span class="priority-high">最優先</span></h4>
+  <table>
+    <tr><th style="width:120px">転用元パターン</th><td>スマイルモア矯正「友人会話型」&yen;490万</td></tr>
+    <tr><th>なぜ最優先か</th><td>TikTok広告費No.1のパターン。若年女性の自然な会話で広告感ゼロ。二重整形の3大不安（高い/怖い/バレる）を会話内で全て解消できる構成</td></tr>
+    <tr><th>フック</th><td>「二重整形したいんだけど高そうで…」「TCB行けば？」</td></tr>
+    <tr><th>尺/形式</th><td>30〜45秒 / 20代女子2人の会話（カフェ or 自宅）</td></tr>
+    <tr><th>CTA</th><td>LINE無料カウンセリング予約</td></tr>
+    <tr><th>量産バリエーション</th><td>不安軸を変える: 「痛そう」ver / 「バレそう」ver / 「取れそう」ver</td></tr>
+    <tr><th>配信先</th><td>TikTok &rarr; Instagram Reels 横展開</td></tr>
+  </table>
+</div>
+
+<div class="plan-box plan-immediate">
+  <h4>案B：「22歳以下限定」年齢ターゲティング CR <span class="priority-high">最優先</span></h4>
+  <table>
+    <tr><th style="width:120px">転用元パターン</th><td>フレイアクリニック「25歳以下限定」&yen;228万</td></tr>
+    <tr><th>なぜ最優先か</th><td>年齢制限でパーソナライズ効果が極大化。フレイアはこの1パターンだけでTikTok全体¥726万。「検索しても出てこない」の限定性が若年層に刺さる</td></tr>
+    <tr><th>フック</th><td>「22歳以下で二重整形まだ悩んでるなら超ラッキー！」</td></tr>
+    <tr><th>尺/形式</th><td>40〜50秒 / ナレーション+テロップ</td></tr>
+    <tr><th>CTA</th><td>「予約枠が空いてるか確認してみて」（ソフトCTA）</td></tr>
+    <tr><th>バリエーション</th><td>年齢区分: 「学生限定」ver / 「20代限定」ver / 「新社会人応援」ver</td></tr>
+    <tr><th>配信先</th><td>TikTok（年齢ターゲティング配信）</td></tr>
+  </table>
+</div>
+
+<div class="plan-box plan-immediate">
+  <h4>案C：「10秒&times;LINE一発誘導」量産型 <span class="priority-high">最優先</span></h4>
+  <table>
+    <tr><th style="width:120px">転用元パターン</th><td>YBC「超短尺&times;LINE@誘導」&yen;173万</td></tr>
+    <tr><th>なぜ最優先か</th><td>10秒CRは制作コスト最小。1メッセージだけ伝えてLINEに流す最短導線。量産してABテスト可能</td></tr>
+    <tr><th>フック</th><td>「腫れない二重整形。TCB特別キャンペーン中」</td></tr>
+    <tr><th>尺/形式</th><td>10秒 / テロップ+ナレーション+症例映像</td></tr>
+    <tr><th>CTA</th><td>LINE@誘導LP</td></tr>
+    <tr><th>量産方法</th><td>メッセージ軸を変えて10本量産: 「バレない二重」「10分で完了」「保証つき二重」「&yen;○○〜」等</td></tr>
+    <tr><th>配信先</th><td>TikTok &rarr; Instagram Reels &rarr; YouTube Shorts</td></tr>
+  </table>
+</div>
+
+<h3>中期施策（制作工数: 中）</h3>
+
+<div class="plan-box plan-mid">
+  <h4>案D：「本気の目元改善始めました」UGC型 <span class="priority-mid">高</span></h4>
+  <table>
+    <tr><th style="width:120px">転用元パターン</th><td>アンス「本気の肌管理始めました」&yen;288万</td></tr>
+    <tr><th>構成</th><td>「毎朝アイプチ20分&rarr;限界&rarr;TCBで埋没&rarr;施術10分&rarr;翌朝そのまま出かけられる感動」</td></tr>
+    <tr><th>尺/形式</th><td>30〜40秒 / 20歳前後の一般女性の1人語り</td></tr>
+    <tr><th>配信先</th><td>TikTok / Instagram Reels</td></tr>
+  </table>
+</div>
+
+<div class="plan-box plan-mid">
+  <h4>案E：「地域限定&times;ラッキー&times;漫画記事LP」型 <span class="priority-mid">高</span></h4>
+  <table>
+    <tr><th style="width:120px">転用元パターン</th><td>LACOCO「地域限定&times;ラッキー」&yen;141万</td></tr>
+    <tr><th>構成</th><td>「二重モニターキャンペーンが話題で予約殺到&rarr;空きがある院に限定配信&rarr;この動画見れた人ラッキー&rarr;本日で停止の可能性」</td></tr>
+    <tr><th>尺/形式</th><td>45〜55秒 / テンポの良いナレーション</td></tr>
+    <tr><th>遷移先</th><td>漫画記事LP（二重整形の体験ストーリー漫画化）</td></tr>
+    <tr><th>配信先</th><td>TikTok / Facebook</td></tr>
+  </table>
+</div>
+
+<div class="plan-box plan-mid">
+  <h4>案F：「おすすめ3選」リスト型 <span class="priority-low">中</span></h4>
+  <table>
+    <tr><th style="width:120px">転用元パターン</th><td>アンス「おすすめ医薬品3選」&yen;78万（別CR）</td></tr>
+    <tr><th>構成</th><td>「二重整形で後悔しないために確認すべき3つのこと」&rarr;1.保証制度 2.症例件数 3.DT&rarr;TCBなら全部クリア</td></tr>
+    <tr><th>尺/形式</th><td>30〜45秒 / 教育型（保存されやすい）</td></tr>
+    <tr><th>配信先</th><td>Instagram Reels / TikTok</td></tr>
+  </table>
+</div>
+
+<h2>CV導線の設計（全パターン共通）</h2>
+
+<div class="flow">
+  <div class="flow-step">
+    <strong>STEP 1</strong><br>
+    TikTok/Reels広告<br>
+    <span style="font-size:11px; color:#666;">10〜50秒の動画CR</span>
+  </div>
+  <div class="flow-arrow">&rarr;</div>
+  <div class="flow-step">
+    <strong>STEP 2</strong><br>
+    LINE@誘導LP<br>
+    <span style="font-size:11px; color:#666;">or 漫画記事LP</span>
+  </div>
+  <div class="flow-arrow">&rarr;</div>
+  <div class="flow-step">
+    <strong>STEP 3</strong><br>
+    LINE追加<br>
+    <span style="font-size:11px; color:#666;">自動応答で院選択</span>
+  </div>
+  <div class="flow-arrow">&rarr;</div>
+  <div class="flow-step">
+    <strong>STEP 4</strong><br>
+    カウンセリング予約<br>
+    <span style="font-size:11px; color:#666;">LINE上で完結</span>
+  </div>
+</div>
+
+<p style="font-size:13px; color:#555; margin-top:8px;">
+<strong>最重要ポイント:</strong> 参考元5社すべてが<strong>電話予約ゼロ</strong>。若年女性は電話をしない。LINE@誘導が全パターン共通の最適導線。
+</p>
+
+<h2>優先度マトリクス</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>施策</th>
+      <th>転用元</th>
+      <th>転用元の実績</th>
+      <th>インパクト</th>
+      <th>工数</th>
+      <th>若年層適性</th>
+      <th>優先度</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>A. 友人会話型</strong></td>
+      <td>スマイルモア矯正</td>
+      <td>&yen;490万/月</td>
+      <td><span class="tag tag-high">最高</span></td>
+      <td><span class="tag tag-mid">中</span></td>
+      <td><span class="tag tag-high">最高</span></td>
+      <td><span class="priority-high">最優先</span></td>
+    </tr>
+    <tr>
+      <td><strong>B. 年齢限定オファー</strong></td>
+      <td>フレイア脱毛</td>
+      <td>&yen;228万/月</td>
+      <td><span class="tag tag-high">高</span></td>
+      <td><span class="tag tag-low">低</span></td>
+      <td><span class="tag tag-high">最高</span></td>
+      <td><span class="priority-high">最優先</span></td>
+    </tr>
+    <tr>
+      <td><strong>C. 10秒LINE一発</strong></td>
+      <td>YBC</td>
+      <td>&yen;173万/月</td>
+      <td><span class="tag tag-mid">中</span></td>
+      <td><span class="tag tag-low">最低</span></td>
+      <td><span class="tag tag-high">高</span></td>
+      <td><span class="priority-high">最優先</span></td>
+    </tr>
+    <tr>
+      <td><strong>D. 「始めました」UGC</strong></td>
+      <td>アンス</td>
+      <td>&yen;288万/月</td>
+      <td><span class="tag tag-high">高</span></td>
+      <td><span class="tag tag-mid">中</span></td>
+      <td><span class="tag tag-high">最高</span></td>
+      <td><span class="priority-mid">高</span></td>
+    </tr>
+    <tr>
+      <td><strong>E. 地域限定ラッキー</strong></td>
+      <td>LACOCO</td>
+      <td>&yen;141万/月</td>
+      <td><span class="tag tag-mid">中</span></td>
+      <td><span class="tag tag-mid">中</span></td>
+      <td><span class="tag tag-high">高</span></td>
+      <td><span class="priority-mid">高</span></td>
+    </tr>
+    <tr>
+      <td><strong>F. おすすめ3選リスト</strong></td>
+      <td>アンス（別CR）</td>
+      <td>&yen;78万/月</td>
+      <td><span class="tag tag-mid">中</span></td>
+      <td><span class="tag tag-low">低</span></td>
+      <td><span class="tag tag-mid">中</span></td>
+      <td><span class="priority-low">中</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>まとめ：3つの最重要インサイト</h2>
+
+<div class="summary-box">
+  <h3>1. TikTok広告費TOP層は全員「会話/UGC/ラッキー」で広告感を消している</h3>
+  <p>月&yen;100万超のCRは例外なく「広告っぽくない」。スマイルモアの友人会話型（&yen;490万）、アンスの体験語り型（&yen;288万）、LACOCOのラッキー型（&yen;141万）。TCBの二重整形CRも<strong>「広告感ゼロ」を最優先設計基準にすべき</strong>。</p>
+</div>
+
+<div class="summary-box">
+  <h3>2. 「年齢限定」は若年層TikTokの最強フック</h3>
+  <p>フレイアの「25歳以下限定」はTikTok全体でTOP級の出稿量（&yen;726万/月）。年齢でターゲットを絞ることで「自分のための広告」と認識させるパーソナライズ効果は、二重整形（若年層メイン施術）との相性が最高。<strong>「22歳以下限定」「学生限定」の年齢限定CRを即テストすべき</strong>。</p>
+</div>
+
+<div class="summary-box">
+  <h3>3. LINE@誘導は「選択」ではなく「必須」</h3>
+  <p>参考元5社すべてがLINE@誘導。YBCは10秒CRからLINE@に直結し&yen;173万。若年女性は電話をしない。記事LPだけでなく<strong>LINE@誘導LPをCV導線の標準にすべき</strong>。特に二重整形は「相談したいけど電話は嫌」という若年層の心理と完全に合致する。</p>
+</div>
+
+<p style="text-align:center; color:#999; margin-top:40px; font-size:12px;">Generated by DPro Analysis Tool - 2026-03-10</p>
+
+</body>
+</html>
