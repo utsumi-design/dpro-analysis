@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCB二重整形 横展開分析 - DPro分析レポート</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 20px; background: #f5f5f5; color: #333; max-width: 1200px; margin: 0 auto; padding: 20px; }
+  h1 { color: #1a1a2e; border-bottom: 3px solid #e94560; padding-bottom: 10px; }
+  h2 { color: #1a1a2e; margin-top: 40px; border-left: 4px solid #e94560; padding-left: 12px; }
+  h3 { color: #16213e; }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  th { background: #1a1a2e; color: #fff; padding: 10px 12px; text-align: left; font-size: 13px; white-space: nowrap; }
+  td { padding: 8px 12px; border-bottom: 1px solid #eee; font-size: 13px; }
+  tr:hover { background: #f0f4ff; }
+  a { color: #0066cc; text-decoration: none; }
+  a:hover { text-decoration: underline; color: #e94560; }
+  .nav { background: #1a1a2e; padding: 12px 20px; border-radius: 8px; margin-bottom: 24px; }
+  .nav a { color: #fff; margin-right: 20px; font-size: 14px; }
+  .nav a:hover { color: #e94560; }
+  .summary-box { background: #fff; border: 2px solid #e94560; border-radius: 8px; padding: 20px; margin: 20px 0; }
+  .pattern-box { background: #f8f9fa; border-left: 4px solid #0066cc; padding: 16px; margin: 12px 0; border-radius: 0 8px 8px 0; }
+  .pattern-box h4 { margin-top: 0; color: #0066cc; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-right: 4px; }
+  .tag-ig { background: #fce4ec; color: #c62828; }
+  .tag-yt { background: #ffebee; color: #d32f2f; }
+  .tag-fb { background: #e3f2fd; color: #1565c0; }
+  .tag-tt { background: #e0f2f1; color: #00695c; }
+  .tag-high { background: #ffe0e0; color: #c0392b; }
+  .tag-mid { background: #fff3cd; color: #856404; }
+  .tag-low { background: #d4edda; color: #155724; }
+  .metric { font-size: 24px; font-weight: bold; color: #e94560; }
+  .metric-label { font-size: 12px; color: #666; }
+  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 16px 0; }
+  .metric-card { background: #fff; border-radius: 8px; padding: 16px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .priority-high { background: #e94560; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+  .priority-mid { background: #f39c12; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+  .priority-low { background: #27ae60; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+  .reason-list { list-style: none; padding: 0; }
+  .reason-list li { padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
+  .reason-list li::before { content: "\2713 "; color: #27ae60; font-weight: bold; }
+  .structure-list { list-style: none; padding: 0; }
+  .structure-list li { padding: 4px 0; }
+  .structure-list li::before { content: "\2192 "; color: #0066cc; }
+  .plan-box { background: #fff; border: 2px solid #0066cc; border-radius: 8px; padding: 20px; margin: 20px 0; }
+  .plan-box h4 { margin-top: 0; color: #0066cc; }
+  .plan-immediate { border-color: #e94560; }
+  .plan-immediate h4 { color: #e94560; }
+  .plan-mid { border-color: #f39c12; }
+  .plan-mid h4 { color: #f39c12; }
+  .insight-box { background: #1a1a2e; color: #fff; border-radius: 8px; padding: 20px; margin: 20px 0; }
+  .insight-box h3 { color: #e94560; margin-top: 0; }
+  .insight-box p { color: #ccc; line-height: 1.8; }
+  .script-box { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin: 8px 0; font-size: 12px; line-height: 1.8; color: #555; }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="index.html">TOP15 横展開分析</a>
+  <a href="selling_phrases.html">売れ文言TOP10</a>
+  <a href="bihadado_analysis.html">東京美肌堂 CR分析</a>
+  <a href="tcb_futae_analysis.html"><strong>TCB二重整形 横展開</strong></a>
+</div>
+
+<h1>TCB 二重整形（女性・若年層）横展開リサーチ</h1>
+<p>データ取得日: 2026-03-10 / 集計期間: 30日間 / 対象: TCB以外の二重整形関連CR / ソース: DPro（動画分析Pro）</p>
+
+<div class="insight-box">
+  <h3>市場概況</h3>
+  <p>二重整形の動画広告市場は、美容医療全体と比較して<strong style="color:#e94560;">広告費規模が小さい</strong>（月間最大で1クリニックあたり約37万円程度）。<br>
+  つまり<strong style="color:#e94560;">まだ動画広告で本気で攻めているプレイヤーが少ない＝先行者利益を取れる余地が大きい</strong>。</p>
+</div>
+
+<div class="metrics-grid">
+  <div class="metric-card">
+    <div class="metric-label">対象キーワード</div>
+    <div style="font-size:14px; font-weight:bold;">二重 / 埋没 / 二重整形 / 目元</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">ターゲット</div>
+    <div class="metric">若年女性</div>
+    <div style="font-size:11px; color:#666;">10代後半〜20代前半</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">市場トップ広告費</div>
+    <div class="metric">約37万/月</div>
+    <div style="font-size:11px; color:#666;">東京イセアクリニック</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">主力媒体</div>
+    <div style="font-size:14px; font-weight:bold;">Instagram / TikTok</div>
+    <div style="font-size:11px; color:#666;">若年層リーチ最適</div>
+  </div>
+</div>
+
+<h2>横展開元 TOP10（TCB除外・推定広告費増順）</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>広告主</th>
+      <th>商材</th>
+      <th>媒体</th>
+      <th>広告費増(30日)</th>
+      <th>訴求タイプ</th>
+      <th>動画</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>1</strong></td>
+      <td>東京イセアクリニック</td>
+      <td>埋没法プレミアム</td>
+      <td><span class="tag tag-ig">Instagram</span></td>
+      <td><strong>&yen;367,796</strong></td>
+      <td>症例ビフォーアフター</td>
+      <td>
+        <a href="https://www.instagram.com/p/DUZ22cYgIas/" target="_blank">IG</a> /
+        <a href="https://assets.douga-pro.com/instagram/DUZ22cYgIas/video.mp4" target="_blank">MP4</a>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>2</strong></td>
+      <td>ジュノビューティー</td>
+      <td>美容医療</td>
+      <td><span class="tag tag-fb">Facebook</span></td>
+      <td><strong>&yen;237,373</strong></td>
+      <td>ほうれい線&times;埋没 価格訴求</td>
+      <td>
+        <a href="https://www.facebook.com/61565576327667/videos/1302318478397709" target="_blank">FB</a> /
+        <a href="https://assets.douga-pro.com/facebook/1302318478397709/video.mp4" target="_blank">MP4</a>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>3</strong></td>
+      <td>ナイトアイボーテ</td>
+      <td>二重美容液</td>
+      <td><span class="tag tag-tt">TikTok</span></td>
+      <td><strong>&yen;156,000</strong></td>
+      <td>UGC風 二重癖付け</td>
+      <td>
+        <a href="https://www.tiktok.com/@MS4wLjABAAAAN9VrH5NhGKBiqjb5LzqzNE_7zQp2E8OWhStFhvkTPfX9kpzxdr5J4C8sXCXWnHnB/video/7525010037102611720" target="_blank">TikTok</a> /
+        <a href="https://assets.douga-pro.com/tiktok/7525010037102611720/video.mp4" target="_blank">MP4</a>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>4</strong></td>
+      <td>ブルームクリニック</td>
+      <td>二重整形</td>
+      <td><span class="tag tag-fb">Facebook</span></td>
+      <td><strong>&yen;127,891</strong></td>
+      <td>体験者インタビュー</td>
+      <td>
+        <a href="https://www.facebook.com/61575704483471/videos/2023029218480416" target="_blank">FB</a> /
+        <a href="https://assets.douga-pro.com/facebook/2023029218480416/video.mp4" target="_blank">MP4</a>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>5</strong></td>
+      <td>ジュノビューティー</td>
+      <td>美容医療</td>
+      <td><span class="tag tag-ig">Instagram</span></td>
+      <td><strong>&yen;103,372</strong></td>
+      <td>LINE誘導&times;価格訴求</td>
+      <td>
+        <a href="https://www.instagram.com/p/DUaA7WJAGE8/" target="_blank">IG</a> /
+        <a href="https://assets.douga-pro.com/instagram/DUaA7WJAGE8/video.mp4" target="_blank">MP4</a>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>6</strong></td>
+      <td>ジュノビューティー</td>
+      <td>美容医療</td>
+      <td><span class="tag tag-tt">TikTok</span></td>
+      <td><strong>&yen;81,016</strong></td>
+      <td>15秒 トライアル価格</td>
+      <td>
+        <a href="https://www.tiktok.com/@MS4wLjABAAAAWIARrOCs1G6Fq1HkbZIXD2rCzxcfo-It3KgXGL2OYg9Uh41429VYXnGU2nqSwYvk/video/7602838787953069368" target="_blank">TikTok</a> /
+        <a href="https://assets.douga-pro.com/tiktok/7602838787953069368/video.mp4" target="_blank">MP4</a>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>7</strong></td>
+      <td>INO BEAUTY CLINIC</td>
+      <td>二重整形埋没法</td>
+      <td><span class="tag tag-ig">Instagram</span></td>
+      <td><strong>&yen;33,440</strong></td>
+      <td>ヒアル&times;肌育 教育型</td>
+      <td>
+        <a href="https://www.instagram.com/p/DUMoGGgDC-s/" target="_blank">IG</a> /
+        <a href="https://assets.douga-pro.com/instagram/DUMoGGgDC-s/video.mp4" target="_blank">MP4</a>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>8</strong></td>
+      <td>Dr.Riki Akiha / L'or</td>
+      <td>二重整形</td>
+      <td><span class="tag tag-ig">Instagram</span></td>
+      <td><strong>&yen;13,041</strong></td>
+      <td>ドクター推薦型</td>
+      <td>
+        <a href="https://www.instagram.com/p/DVKxv7bgG1o/" target="_blank">IG</a> /
+        <a href="https://assets.douga-pro.com/instagram/DVKxv7bgG1o/video.mp4" target="_blank">MP4</a>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>9</strong></td>
+      <td>Shion Beauty Clinic</td>
+      <td>二重整形</td>
+      <td><span class="tag tag-ig">Instagram</span></td>
+      <td><strong>&yen;6,924</strong></td>
+      <td>「二重整形の女王」権威型</td>
+      <td>
+        <a href="https://www.instagram.com/p/DU9qEhXgLaJ/" target="_blank">IG</a> /
+        <a href="https://assets.douga-pro.com/instagram/DU9qEhXgLaJ/video.mp4" target="_blank">MP4</a>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>10</strong></td>
+      <td>東岡崎美容クリニック</td>
+      <td>二重整形</td>
+      <td><span class="tag tag-ig">Instagram</span></td>
+      <td><strong>&yen;6,228</strong></td>
+      <td>アイプチ卒業 モニター訴求</td>
+      <td>
+        <a href="https://www.instagram.com/p/DTt1t8bgEft/" target="_blank">IG</a> /
+        <a href="https://assets.douga-pro.com/instagram/DTt1t8bgEft/video.mp4" target="_blank">MP4</a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>訴求パターン分析（5タイプ）</h2>
+
+<div class="pattern-box">
+  <h4>パターン1：「症例ビフォーアフター」型（#1 東京イセア） <span class="priority-high">効果感: 最高</span></h4>
+  <p><strong>形式:</strong> 5秒の超短尺リール。術前→術後の目元を見せるだけ</p>
+  <p><strong>テキスト量:</strong> 動画内は最小限。キャプションに詳細（術式名/料金/保証/ダウンタイム）を全て記載</p>
+  <p><strong>キーワード:</strong> 「198,000円」「施術時間約10分」「ダウンタイム約1週間」「5年間無料で再手術」</p>
+  <p><strong>なぜ効くか:</strong></p>
+  <ul class="reason-list">
+    <li>若年層は「長い説明」より「見て判断」。ビジュアルの変化がすべて</li>
+    <li>IG Reelsの自動再生で繰り返し見られ、「あの動画」として記憶に残る</li>
+    <li>テキスト情報はキャプションに分離することで「情報過多」を避ける</li>
+  </ul>
+</div>
+
+<div class="pattern-box">
+  <h4>パターン2：「体験者リアルインタビュー」型（#4 ブルーム） <span class="priority-high">共感性: 最高</span></h4>
+  <p><strong>形式:</strong> 30秒、実際の患者の声</p>
+  <p><strong>キーワード:</strong> 「切らない」「バレない」「66,000円」「症例10,000件以上」</p>
+  <div class="script-box">
+    <strong>スクリプト:</strong> 「高校生ぐらいから10年間ずっとアイテープで朝二重作るのがめんどくさくて」
+  </div>
+  <p><strong>なぜ効くか:</strong></p>
+  <ul class="reason-list">
+    <li>若年層の共感ポイント「毎朝のアイテープがめんどくさい」をそのまま言語化</li>
+    <li>66,000円という手が届く価格が若年層に刺さる</li>
+    <li>「バレない」が若年層最大の懸念を解消</li>
+  </ul>
+</div>
+
+<div class="pattern-box">
+  <h4>パターン3：「ドクター個人ブランド」型（#8 Dr.Riki） <span class="priority-mid">信頼性: 最高</span></h4>
+  <p><strong>形式:</strong> 59秒、院長が直接語るリール</p>
+  <p><strong>キーワード:</strong> 「最大40%オフ」「一生涯保証」「表面に傷なし」「直後からメイク可能」</p>
+  <div class="script-box">
+    <strong>スクリプト:</strong> 「全国の美容外科医全員のインスタを見て僕が直接スカウトした」「埋没二重術の実績東日本1位」
+  </div>
+  <p><strong>なぜ効くか:</strong></p>
+  <ul class="reason-list">
+    <li>「誰がやるか」が若年層の最大の選定基準</li>
+    <li>学会登壇・症例件数1万件以上の実績で安心感</li>
+    <li>モニター割・セット割で初回のハードルを下げる</li>
+  </ul>
+</div>
+
+<div class="pattern-box">
+  <h4>パターン4：「アイプチ卒業」型（#3 ナイトアイボーテ, #10 東岡崎） <span class="priority-high">若年層適性: 最適</span></h4>
+  <p><strong>形式:</strong> TikTok UGC風 / Instagram広告</p>
+  <div class="script-box">
+    <strong>スクリプト(ナイトアイボーテ):</strong> 「よく二重幅を褒めてもらえるんだけど、実は夜に癖つけしてます」<br>
+    <strong>スクリプト(東岡崎):</strong> 「毎朝のアイプチ・アイテープはもう卒業！モニター価格5.5万円」
+  </div>
+  <p><strong>なぜ効くか:</strong></p>
+  <ul class="reason-list">
+    <li>10代後半〜20代前半のリアルな悩み「毎朝の二重作りが面倒」に直結</li>
+    <li>ナイトアイボーテはTikTok 580万再生＝この悩みの市場規模が証明されている</li>
+    <li>「卒業」というワードが前向きで、整形へのネガティブイメージを緩和</li>
+  </ul>
+</div>
+
+<div class="pattern-box">
+  <h4>パターン5：「価格インパクト&times;LINE誘導」型（#2,5,6 ジュノ） <span class="priority-mid">CV導線: 最も洗練</span></h4>
+  <p><strong>形式:</strong> 5〜15秒の短尺動画。価格を大きくテロップ表示</p>
+  <p><strong>遷移先:</strong> LINE@誘導LP（全体の60%以上がLINE誘導）</p>
+  <p><strong>キーワード:</strong> 「19,800円〜」「初回トライアル」</p>
+  <p><strong>なぜ効くか:</strong></p>
+  <ul class="reason-list">
+    <li>若年層は電話予約をしない。LINEが最も自然な導線</li>
+    <li>短尺&times;価格インパクトで「え、安い」からのLINE追加を狙う</li>
+    <li>LINE上でカウンセリング&rarr;来院予約のステップを踏ませる</li>
+  </ul>
+</div>
+
+<h2>記事LP・遷移先の参考</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>参考元</th>
+      <th>URL種別</th>
+      <th>特徴</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ブルームクリニック</td>
+      <td><a href="https://bloom-clinic.jp/%e4%ba%8c%e9%87%8d%e3%82%ad%e3%83%a3%e3%83%b3%e3%83%9a%e3%83%bc%e3%83%b3/" target="_blank">二重キャンペーンLP</a></td>
+      <td>LINE@誘導型。66,000円を前面に。症例写真+FAQ</td>
+    </tr>
+    <tr>
+      <td>ブルームクリニック</td>
+      <td><a href="https://bloom-clinic.jp/menu/%e4%ba%8c%e9%87%8d%e5%9f%8b%e6%b2%a1%e6%b3%95%e3%83%bb%e4%ba%8c%e9%87%8d%e5%85%a8%e5%88%87%e9%96%8b/" target="_blank">二重埋没法メニューLP</a></td>
+      <td>LINE@誘導。術式詳細+ダウンタイム情報</td>
+    </tr>
+    <tr>
+      <td>ジュノビューティー</td>
+      <td>LINE@誘導LP</td>
+      <td>施術メニュー一覧&rarr;LINEで予約。若年層向けUI</td>
+    </tr>
+    <tr>
+      <td>東岡崎美容クリニック</td>
+      <td>記事LP</td>
+      <td>「アイプチ卒業」切り口。モニター5.5万円訴求</td>
+    </tr>
+    <tr>
+      <td>東京イセアクリニック</td>
+      <td>公式サイト誘導</td>
+      <td>IG&rarr;プロフィールURL&rarr;予約。キャプションに全情報</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>TCB二重整形 横展開 具体案</h2>
+
+<h3>即実行（TikTok/Reels中心・若年層特化）</h3>
+
+<div class="plan-box plan-immediate">
+  <h4>案A：「アイプチ卒業ドキュメンタリー」型 TikTok CR <span class="priority-high">最優先</span></h4>
+  <table>
+    <tr><th style="width:120px">横展開元</th><td>#3 ナイトアイボーテ + #4 ブルーム</td></tr>
+    <tr><th>構成</th><td>毎朝アイテープ貼る&rarr;面倒&rarr;TCBで施術&rarr;翌朝スッピンでぱっちり二重</td></tr>
+    <tr><th>尺</th><td>30〜45秒</td></tr>
+    <tr><th>演者</th><td>20歳前後の一般女性（UGC風）</td></tr>
+    <tr><th>フック</th><td><strong>「毎朝15分のアイテープ、やめました」</strong></td></tr>
+    <tr><th>CTA</th><td>LINE追加 or 無料カウンセリング予約</td></tr>
+    <tr><th>配信先</th><td>TikTok / Instagram Reels</td></tr>
+  </table>
+</div>
+
+<div class="plan-box plan-immediate">
+  <h4>案B：「5秒ビフォーアフター」型 Instagram Reels <span class="priority-high">最優先</span></h4>
+  <table>
+    <tr><th style="width:120px">横展開元</th><td>#1 東京イセアクリニック</td></tr>
+    <tr><th>構成</th><td>術前の目元&rarr;TCBロゴ&rarr;術後の目元。テロップで「TCB二重術 &yen;○○〜」</td></tr>
+    <tr><th>尺</th><td>5〜8秒</td></tr>
+    <tr><th>キャプション</th><td>術式名/料金/ダウンタイム/保証内容を詳細記載</td></tr>
+    <tr><th>量産方法</th><td>症例10パターンを制作し、反応の良い目元タイプを特定</td></tr>
+    <tr><th>配信先</th><td>Instagram Reels</td></tr>
+  </table>
+</div>
+
+<div class="plan-box plan-immediate">
+  <h4>案C：「ドクター推薦」型 Instagram Reels <span class="priority-mid">高</span></h4>
+  <table>
+    <tr><th style="width:120px">横展開元</th><td>#8 Dr.Riki</td></tr>
+    <tr><th>構成</th><td>TCBの二重担当ドクターが直接語る「なぜこの術式が選ばれるのか」</td></tr>
+    <tr><th>尺</th><td>30〜60秒</td></tr>
+    <tr><th>キーワード</th><td>症例件数/保証/DT最小化の工夫</td></tr>
+    <tr><th>差別化</th><td>「TCBなら全国○院で同じクオリティ」を打ち出す</td></tr>
+    <tr><th>配信先</th><td>Instagram Reels</td></tr>
+  </table>
+</div>
+
+<h3>中期施策</h3>
+
+<div class="plan-box plan-mid">
+  <h4>案D：「二重整形の不安解消」教育型 YouTube/Shorts <span class="priority-mid">中</span></h4>
+  <table>
+    <tr><th style="width:120px">横展開元</th><td>#9 Shion（権威型）+ #7 INO（教育型）</td></tr>
+    <tr><th>構成</th><td>「二重整形の種類知ってる？」&rarr;埋没/切開の違い&rarr;TCBならではの強み</td></tr>
+    <tr><th>尺</th><td>Shorts 30秒 / YouTube 2〜3分</td></tr>
+    <tr><th>ターゲット</th><td>検討層（まだ決めていないが気になっている）</td></tr>
+    <tr><th>配信先</th><td>YouTube Shorts / YouTube広告</td></tr>
+  </table>
+</div>
+
+<div class="plan-box plan-mid">
+  <h4>案E：「LINE限定カウンセリング」導線構築 <span class="priority-mid">高</span></h4>
+  <table>
+    <tr><th style="width:120px">横展開元</th><td>#2,5,6 ジュノのLINE誘導モデル</td></tr>
+    <tr><th>構成</th><td>動画CR &rarr; LINE@追加 &rarr; AI or 担当者による事前カウンセリング &rarr; 来院予約</td></tr>
+    <tr><th>理由</th><td>若年層は電話しない。LINEが最も自然。ジュノが最も広告費をかけている導線</td></tr>
+    <tr><th>配信先</th><td>全媒体（LINE誘導LP経由）</td></tr>
+  </table>
+</div>
+
+<div class="plan-box plan-mid">
+  <h4>案F：「友達と一緒に」ペア割訴求 <span class="priority-low">中</span></h4>
+  <table>
+    <tr><th style="width:120px">横展開元</th><td>新規切り口（競合になし）</td></tr>
+    <tr><th>構成</th><td>「友達と一緒にカウンセリング来たら○○円OFF」</td></tr>
+    <tr><th>理由</th><td>若年層は一人で美容クリニックに行くのが不安。ペアだと来院率が上がる</td></tr>
+    <tr><th>配信先</th><td>TikTok / Instagram</td></tr>
+  </table>
+</div>
+
+<h2>マーケティング要素まとめ</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>要素</th>
+      <th>競合の使い方</th>
+      <th>TCBへの活用提案</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>価格明示</strong></td>
+      <td>ブルーム&yen;66K、イセア&yen;198K、東岡崎&yen;55K</td>
+      <td>TCBの二重埋没の価格を動画内テロップで明示。「&yen;○○〜」ではなく「&yen;○○」と言い切る</td>
+    </tr>
+    <tr>
+      <td><strong>DT(ダウンタイム)訴求</strong></td>
+      <td>「約1週間」「施術10分」</td>
+      <td>「翌日からメイクOK」等、具体的な日数で不安を解消</td>
+    </tr>
+    <tr>
+      <td><strong>保証</strong></td>
+      <td>イセア「5年無料再手術」、Dr.Riki「一生涯保証」</td>
+      <td>TCBの保証制度を前面に。若年層は「取れたらどうしよう」が最大の不安</td>
+    </tr>
+    <tr>
+      <td><strong>バレない</strong></td>
+      <td>ブルーム「切らない・バレない」</td>
+      <td>「バレない二重」は若年層最大のニーズ。スッピン時の自然さをビジュアルで証明</td>
+    </tr>
+    <tr>
+      <td><strong>LINE導線</strong></td>
+      <td>ジュノが6割以上をLINE誘導</td>
+      <td>電話予約&rarr;LINE予約にシフト。若年層のCV率が確実に上がる</td>
+    </tr>
+    <tr>
+      <td><strong>UGC風</strong></td>
+      <td>ナイトアイボーテ 580万再生</td>
+      <td>一般女性の体験をvlog風で撮影。「広告っぽくない」が若年層に刺さる</td>
+    </tr>
+    <tr>
+      <td><strong>ドクター訴求</strong></td>
+      <td>Dr.Riki「症例1万件」「学会登壇」</td>
+      <td>TCBドクターの実績・人柄を前面に。「誰に任せるか」が若年層の意思決定要因</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>優先度マトリクス</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>施策</th>
+      <th>インパクト</th>
+      <th>工数</th>
+      <th>若年層適性</th>
+      <th>優先度</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>B. 5秒ビフォーアフター量産</strong></td>
+      <td><span class="tag tag-high">高</span></td>
+      <td><span class="tag tag-low">低</span></td>
+      <td><span class="tag tag-high">高</span></td>
+      <td><span class="priority-high">最優先</span></td>
+    </tr>
+    <tr>
+      <td><strong>A. アイプチ卒業UGC</strong></td>
+      <td><span class="tag tag-high">高</span></td>
+      <td><span class="tag tag-mid">中</span></td>
+      <td><span class="tag tag-high">最高</span></td>
+      <td><span class="priority-high">最優先</span></td>
+    </tr>
+    <tr>
+      <td><strong>E. LINE導線構築</strong></td>
+      <td><span class="tag tag-high">高</span></td>
+      <td><span class="tag tag-high">高</span></td>
+      <td><span class="tag tag-high">最高</span></td>
+      <td><span class="priority-mid">高</span></td>
+    </tr>
+    <tr>
+      <td><strong>C. ドクター推薦Reels</strong></td>
+      <td><span class="tag tag-mid">中</span></td>
+      <td><span class="tag tag-mid">中</span></td>
+      <td><span class="tag tag-mid">中</span></td>
+      <td><span class="priority-mid">高</span></td>
+    </tr>
+    <tr>
+      <td><strong>D. 教育型Shorts</strong></td>
+      <td><span class="tag tag-mid">中</span></td>
+      <td><span class="tag tag-mid">中</span></td>
+      <td><span class="tag tag-mid">中</span></td>
+      <td><span class="priority-low">中</span></td>
+    </tr>
+    <tr>
+      <td><strong>F. ペア割訴求</strong></td>
+      <td><span class="tag tag-mid">中</span></td>
+      <td><span class="tag tag-low">低</span></td>
+      <td><span class="tag tag-high">高</span></td>
+      <td><span class="priority-low">中</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<p style="text-align:center; color:#999; margin-top:40px; font-size:12px;">Generated by DPro Analysis Tool - 2026-03-10</p>
+
+</body>
+</html>
